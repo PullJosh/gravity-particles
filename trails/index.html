@@ -1,0 +1,138 @@
+<html>
+
+<head>
+  <title>Gravity Particles | Trails</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+  <div id="links">
+    <a href="../spawner/">Spawner</a> / <a href="../custom/">Custom</a> / <a class="current">Trails</a>
+  </div>
+  <canvas id="canvas"></canvas>
+  <script>
+    var canvas = document.getElementById("canvas"),
+      ctx = canvas.getContext("2d");
+
+    var objects, segments, k, mouseDown, mouseX, mouseY;
+
+    var planet = function (x, y, posRand, mass, xVel, yVel, velRand) {
+      var dir = Math.random() * Math.PI * 2;
+      this.x = x + Math.cos(dir) * posRand * Math.random();
+      this.y = y + Math.sin(dir) * posRand * Math.random();
+      this.mass = mass;
+      var dir = Math.random() * Math.PI * 2;
+      this.xVel = parseInt(xVel) + Math.cos(dir) * velRand * Math.random();
+      this.yVel = parseInt(yVel) + Math.sin(dir) * velRand * Math.random();
+    };
+
+    function drawDot(x, y, r) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2 * Math.PI);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+    }
+
+    function dist(obj1, obj2) {
+      return Math.sqrt(Math.pow(obj2.x - obj1.x, 2) + Math.pow(obj2.y - obj1.y, 2));
+    }
+
+    var segment = function (x1, y1, x2, y2) {
+      /* Overusing the "new" thing because I just learned how to do it.
+       Probably not actually needed here. */
+      this.x1 = x1;
+      this.y1 = y1;
+      this.x2 = x2;
+      this.y2 = y2;
+      this.time = new Date().getTime();
+    }
+
+    function dataUpdate() {
+      if (mouseDown && Math.random() < 0.2) {
+        objects.push(new planet(mouseX, mouseY, 80, Math.random() * 8 + 3, 0, 0, 5));
+      }
+      for (i = 0; i < objects.length; i++) {
+
+        if (objects[i].x < -100 ||
+          objects[i].x > canvas.width + 100 ||
+          objects[i].y < -100 ||
+          objects[i].y > canvas.height + 100) {
+
+          objects.splice(i, 1);
+        } else {
+          for (n = 0; n < objects.length; n++) {
+            if (n != i) {
+              var force = k * objects[n].mass / dist(objects[i], objects[n]);
+              var angle = Math.atan2(objects[i].y - objects[n].y, objects[i].x - objects[n].x);
+              objects[i].xVel += force * -Math.cos(angle);
+              objects[i].yVel += force * -Math.sin(angle);
+            }
+          }
+          var old_x = objects[i].x;
+          var old_y = objects[i].y;
+          objects[i].x += objects[i].xVel;
+          objects[i].y += objects[i].yVel;
+          segments.push(new segment(old_x, old_y, objects[i].x, objects[i].y));
+        }
+      }
+    }
+
+    function render() {
+      var currentTime = new Date().getTime();
+      for (i = 0; i < segments.length; i++) {
+        var alpha = 1 / ((currentTime - segments[i].time) / 100);
+        if (alpha < 0.05) {
+          segments.splice(i, 1);
+          i--;
+        } else {
+          ctx.strokeStyle = "rgba(255,255,255," + alpha + ")";
+          ctx.beginPath();
+          ctx.moveTo(segments[i].x1, segments[i].y1);
+          ctx.lineTo(segments[i].x2, segments[i].y2);
+          ctx.stroke();
+        }
+      }
+      for (i = 0; i < objects.length; i++) {
+        drawDot(objects[i].x, objects[i].y, objects[i].mass);
+      }
+    }
+
+    function loop() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      dataUpdate();
+      render();
+
+      window.requestAnimationFrame(loop);
+    }
+
+    function mouseMove(e) {
+      if (e.offsetX) {
+        mouseX = e.offsetX;
+        mouseY = e.offsetY;
+      } else if (e.layerX) {
+        mouseX = e.layerX;
+        mouseY = e.layerY;
+      }
+    }
+
+    function init() {
+      objects = [];
+      segments = [];
+      k = 1;
+      mouseDown = false;
+      window.onmousedown = function () {
+        mouseDown = true;
+      };
+      window.onmouseup = function () {
+        mouseDown = false;
+      };
+      window.onmousemove = mouseMove;
+      loop();
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
