@@ -6,11 +6,9 @@ body {
 #canvas {
   background: black;
 }
-
-#links {
+#name, #links {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top:10px;
   color: #777;
   font-family: "Lucida Console", Monaco, monospace;
   -webkit-touch-callout: none;
@@ -19,6 +17,16 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+#links {
+  right:10px;
+}
+#name {
+  left:10px;
+}
+#name a {
+  color:white;
 }
 
 #links a {
