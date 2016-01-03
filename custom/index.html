@@ -56,10 +56,10 @@
       }
       for (i = 0; i < objects.length; i++) {
           
-        if (objects[i].x < -100 - Math.abs(objects[i].r) ||
-          objects[i].x > canvas.width + 100 + Math.abs(objects[i].r) ||
-          objects[i].y < -100 - Math.abs(objects[i].r) ||
-          objects[i].y > canvas.height + 100 + Math.abs(objects[i].r)) {
+        if (objects[i].x < -100 ||
+          objects[i].x > canvas.width + 100 ||
+          objects[i].y < -100 ||
+          objects[i].y > canvas.height + 100) {
 
           objects.splice(i, 1);
         } else {
